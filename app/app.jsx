@@ -28,7 +28,7 @@ function App() {
     clearTimers();
     setPageShown(false);
     if (location.hash) history.pushState(null, '', location.pathname);
-    setPageId(null); setZoom(false);
+    timers.current.push(setTimeout(() => { setPageId(null); setZoom(false); }, 560));
   }, []);
 
   const navTo = useCallback((id) => {

@@ -54,81 +54,6 @@ function Block({ b }) {
   return null;
 }
 
-function PageBgCanvas({ accent }) {
-  const ref = React.useRef(null);
-  React.useEffect(() => {
-    const canvas = ref.current; if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const COL = accent === 'blue' ? [138, 166, 255] : [78, 220, 178];
-    let W = 0, H = 0, nodes = [], raf, start = performance.now();
-    const rnd = (a, b) => a + Math.random() * (b - a);
-
-    const build = () => {
-      const r = canvas.parentElement.getBoundingClientRect();
-      W = Math.max(600, r.width); H = Math.max(800, r.height);
-      canvas.width = W * dpr; canvas.height = H * dpr;
-      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const N = Math.min(200, Math.round((W * H) / 6000));
-      nodes = Array.from({ length: N }, () => {
-        const z = Math.random();
-        return {
-          x: rnd(-40, W + 40), y: rnd(-40, H + 40), z,
-          vx: rnd(-0.5, 0.5) * (0.06 + z * 0.12),
-          vy: rnd(-0.5, 0.5) * (0.06 + z * 0.12),
-          r: 0.5 + z * 2.4, ph: Math.random() * 6.28,
-        };
-      });
-    };
-    build();
-
-    const LINK = 170, LINK2 = LINK * LINK;
-    const draw = (now) => {
-      const t = now - start;
-      ctx.clearRect(0, 0, W, H);
-      for (let i = 0; i < nodes.length; i++) {
-        const p = nodes[i];
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < -40) p.x = W + 40; else if (p.x > W + 40) p.x = -40;
-        if (p.y < -40) p.y = H + 40; else if (p.y > H + 40) p.y = -40;
-      }
-      for (let i = 0; i < nodes.length; i++) {
-        const a = nodes[i];
-        for (let j = i + 1; j < nodes.length; j++) {
-          const b = nodes[j];
-          const dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
-          if (d2 < LINK2) {
-            const d = Math.sqrt(d2);
-            const al = (1 - d / LINK) * 0.11 * ((a.z + b.z) * 0.5 + 0.3);
-            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(${COL[0]},${COL[1]},${COL[2]},${al.toFixed(3)})`;
-            ctx.lineWidth = 0.55; ctx.stroke();
-          }
-        }
-      }
-      for (let i = 0; i < nodes.length; i++) {
-        const p = nodes[i];
-        const tw = 0.55 + 0.45 * Math.sin(t / 2000 + p.ph);
-        const r = p.r * (0.85 + tw * 0.3);
-        const a = (0.1 + p.z * 0.32) * tw;
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 5);
-        g.addColorStop(0, `rgba(${COL[0]},${COL[1]},${COL[2]},${(a * 0.7).toFixed(3)})`);
-        g.addColorStop(1, `rgba(${COL[0]},${COL[1]},${COL[2]},0)`);
-        ctx.beginPath(); ctx.arc(p.x, p.y, r * 5, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
-        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${COL[0]},${COL[1]},${COL[2]},${Math.min(0.55, a + 0.15).toFixed(3)})`; ctx.fill();
-      }
-      raf = requestAnimationFrame(draw);
-    };
-    raf = requestAnimationFrame(draw);
-    let ro; try { ro = new ResizeObserver(build); ro.observe(canvas.parentElement); } catch(e) {}
-    const tids = [100, 400].map((d) => setTimeout(build, d));
-    return () => { cancelAnimationFrame(raf); if (ro) ro.disconnect(); tids.forEach(clearTimeout); };
-  }, [accent]);
-  return <canvas ref={ref} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}></canvas>;
-}
-
 function PageView({ id, onBack, onNav }) {
   const SITE = window.SITE;
   const neuron = SITE.neurons.find((n) => n.id === id);
@@ -139,7 +64,6 @@ function PageView({ id, onBack, onNav }) {
 
   return (
     <div className={`pg-root ${accent}`}>
-      <PageBgCanvas accent={accent} />
       <div className="pg-grid"></div>
       <div className="pg-scroll">
         <div className="pg-inner">
