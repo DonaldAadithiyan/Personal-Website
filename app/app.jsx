@@ -7,6 +7,7 @@ function App() {
   const [pageShown, setPageShown] = useState(false);
   const [zoom, setZoom] = useState(false);
   const [origin, setOrigin] = useState({ x: 50, y: 50 });
+  const [netKey, setNetKey] = useState(0);
   const timers = useRef([]);
   const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
 
@@ -28,7 +29,10 @@ function App() {
     clearTimers();
     setPageShown(false);
     if (location.hash) history.pushState(null, '', location.pathname);
-    timers.current.push(setTimeout(() => { setPageId(null); setZoom(false); }, 560));
+    timers.current.push(setTimeout(() => {
+      setPageId(null); setZoom(false);
+      setNetKey((k) => k + 1); // remount NetworkView: resets all stuck state & restarts animations
+    }, 100));
   }, []);
 
   const navTo = useCallback((id) => {
@@ -70,7 +74,7 @@ function App() {
 
       <div className="app-stage">
         <div className="app-net" style={{ '--ox': origin.x + '%', '--oy': origin.y + '%' }} data-zoom={zoom ? '1' : '0'}>
-          <NetworkView onOpen={open} />
+          <NetworkView key={netKey} onOpen={open} />
         </div>
         {pageId ? (
           <div className={`app-page ${pageShown ? 'show' : ''}`}>

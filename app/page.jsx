@@ -1,4 +1,70 @@
 // page.jsx — renders one neuron's full page from its config `blocks`.
+
+// Ambient neural background for sub-pages — dim, viewport-fixed, behind all content.
+function PageBgCanvas({ accent }) {
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    const canvas = ref.current; if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const COL = accent === 'blue' ? [138, 166, 255] : [78, 220, 178];
+    let W = 0, H = 0, nodes = [], raf, start = performance.now();
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    const build = () => {
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const N = Math.min(160, Math.round((W * H) / 8000));
+      nodes = Array.from({ length: N }, () => {
+        const z = Math.random();
+        return { x: rnd(-20, W + 20), y: rnd(-20, H + 20), z,
+          vx: rnd(-0.5, 0.5) * (0.04 + z * 0.08), vy: rnd(-0.5, 0.5) * (0.04 + z * 0.08),
+          r: 0.4 + z * 1.8, ph: Math.random() * 6.28 };
+      });
+    };
+    build();
+    const LINK = 145, LINK2 = LINK * LINK;
+    const draw = (now) => {
+      const t = now - start;
+      ctx.clearRect(0, 0, W, H);
+      for (let i = 0; i < nodes.length; i++) {
+        const p = nodes[i];
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < -20) p.x = W + 20; else if (p.x > W + 20) p.x = -20;
+        if (p.y < -20) p.y = H + 20; else if (p.y > H + 20) p.y = -20;
+      }
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
+          if (d2 < LINK2) {
+            const d = Math.sqrt(d2);
+            const al = (1 - d / LINK) * 0.09 * ((a.z + b.z) * 0.5 + 0.35);
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(${COL[0]},${COL[1]},${COL[2]},${al.toFixed(3)})`;
+            ctx.lineWidth = 0.45; ctx.stroke();
+          }
+        }
+      }
+      for (let i = 0; i < nodes.length; i++) {
+        const p = nodes[i];
+        const tw = 0.5 + 0.5 * Math.sin(t / 2400 + p.ph);
+        const r = p.r * (0.85 + tw * 0.28);
+        const a = (0.07 + p.z * 0.22) * tw;
+        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${COL[0]},${COL[1]},${COL[2]},${Math.min(0.42, a + 0.09).toFixed(3)})`; ctx.fill();
+      }
+      raf = requestAnimationFrame(draw);
+    };
+    raf = requestAnimationFrame(draw);
+    window.addEventListener('resize', build);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', build); };
+  }, [accent]);
+  return <canvas ref={ref} style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}></canvas>;
+}
+
 function EntriesBlock({ items }) {
   const [shown, setShown] = React.useState(false);
   React.useEffect(() => {
@@ -64,6 +130,7 @@ function PageView({ id, onBack, onNav }) {
 
   return (
     <div className={`pg-root ${accent}`}>
+      <PageBgCanvas accent={accent} />
       <div className="pg-grid"></div>
       <div className="pg-scroll">
         <div className="pg-inner">
