@@ -220,7 +220,7 @@ function PageView({ id, onBack, onNav }) {
       <div className="pg-scroll">
         <div className="pg-inner">
           <button className="pg-back" onClick={onBack}>
-            <span className="pg-back-neuron"></span> back to network
+            ← backpropagate
           </button>
 
           <div className="pg-hero">

@@ -737,7 +737,9 @@ function NetworkView({ onOpen }) {
             const dim = isLit(id) ? '' : 'dim';
             if (n.kind === 'input') {
               return (
-                <div key={id} className={`nw-node nw-input ${dim}`} style={{ left: p.x, top: p.y, cursor: 'pointer' }}
+                <div key={id} className={`nw-node nw-input egg-hint ${dim}`}
+                     data-tip="// click me 5× fast"
+                     style={{ left: p.x, top: p.y, cursor: 'pointer' }}
                      onMouseEnter={() => setHovered(id)} onMouseLeave={() => setHovered(null)}
                      onClick={onPhotoClick}>
                   <div className="nw-core" style={{ width: d, height: d }}>
@@ -778,7 +780,8 @@ function NetworkView({ onOpen }) {
       </div>
 
       <div className="nw-hint"><span className="k">›</span> drag your eye through the network · hover a neuron · click to enter</div>
-      <div className="nw-coords" style={{ cursor: 'pointer' }} onClick={onForwardPassClick}>forward pass · live</div>
+      <div className="nw-coords egg-hint" data-tip="// executable — try clicking"
+           style={{ cursor: 'pointer' }} onClick={onForwardPassClick}>forward pass · live</div>
 
       {/* #5 sleep overlay */}
       {sleeping && (

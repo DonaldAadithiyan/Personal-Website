@@ -177,6 +177,23 @@ html, body { margin: 0; height: 100%; background: var(--bg); }
 .nw-joke-bubble.vb { bottom: -8px; --by: 0%; }
 .nw-joke-tag { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--joke); margin-bottom: 5px; letter-spacing: .06em; }
 
+/* egg-hint — hover tooltip for easter egg clues */
+.egg-hint[data-tip]::after {
+  content: attr(data-tip); position: absolute; bottom: calc(100% + 9px); left: 50%;
+  transform: translateX(-50%) translateY(5px); background: var(--panel-solid);
+  border: 1px solid color-mix(in srgb, var(--teal) 35%, var(--line)); color: var(--teal);
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 4px 9px;
+  border-radius: 7px; white-space: nowrap; letter-spacing: .03em;
+  opacity: 0; pointer-events: none; z-index: 9999;
+  transition: opacity .2s ease, transform .2s ease; }
+.egg-hint[data-tip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* downward variant — for elements at the top of the screen */
+.egg-hint-down[data-tip]::after { bottom: auto; top: calc(100% + 9px); transform: translateX(-50%) translateY(-5px); }
+.egg-hint-down[data-tip]:hover::after { transform: translateX(-50%) translateY(0); }
+/* brand dot: tiny 8px element at top-left — align tooltip to left edge, not center */
+.app-brand-dot[data-tip]::after { left: 0; transform: translateY(-5px); }
+.app-brand-dot[data-tip]:hover::after { transform: translateY(0); }
+
 /* easter-egg toast */
 .nw-egg { position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%) translateY(14px); z-index: 50;
   background: var(--panel-solid); border: 1px solid color-mix(in srgb, var(--teal) 45%, var(--line)); border-radius: 12px;
@@ -196,9 +213,13 @@ html, body { margin: 0; height: 100%; background: var(--bg); }
 .pg-scroll { position: absolute; inset: 0; overflow-y: auto; }
 .pg-inner { max-width: 880px; margin: 0 auto; padding: 104px 40px 96px; position: relative; }
 
-.pg-back { background: none; border: 0; cursor: pointer; color: var(--soft); font-family: 'IBM Plex Mono', monospace;
-  font-size: 12.5px; display: inline-flex; align-items: center; gap: 9px; padding: 8px 0; margin-bottom: 26px; transition: color .2s; white-space: nowrap; }
-.pg-back:hover { color: var(--teal); }
+.pg-back { background: color-mix(in srgb, var(--teal) 8%, transparent); border: 1px solid color-mix(in srgb, var(--teal) 30%, transparent);
+  cursor: pointer; color: var(--teal); font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px;
+  border-radius: 8px; margin-bottom: 30px; transition: background .2s, border-color .2s, transform .2s; white-space: nowrap; }
+.pg-back:hover { background: color-mix(in srgb, var(--teal) 14%, transparent); border-color: var(--teal); transform: translateX(-2px); }
+.pg-root.blue .pg-back { background: color-mix(in srgb, var(--blue) 8%, transparent); border-color: color-mix(in srgb, var(--blue) 30%, transparent); color: var(--blue); }
+.pg-root.blue .pg-back:hover { background: color-mix(in srgb, var(--blue) 14%, transparent); border-color: var(--blue); }
 .pg-back-neuron { width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--teal); box-shadow: 0 0 10px color-mix(in srgb, var(--teal) 60%, transparent); }
 .pg-root.blue .pg-back:hover { color: var(--blue); }
 .pg-root.blue .pg-back-neuron { border-color: var(--blue); box-shadow: 0 0 10px color-mix(in srgb, var(--blue) 60%, transparent); }
@@ -218,7 +239,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); }
 .pg-hero-content { position: relative; z-index: 1; }
 .pg-kicker { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); margin-bottom: 18px; }
 .pg-root.blue .pg-kicker { color: var(--blue); }
-.pg-title { font-family: 'Newsreader', Georgia, serif; font-weight: 500; font-size: 60px; line-height: 1; letter-spacing: -0.02em; margin: 0 0 22px; }
+.pg-title { font-family: 'Newsreader', Georgia, serif; font-weight: 500; font-size: clamp(32px, 6vw, 60px); line-height: 1; letter-spacing: -0.02em; margin: 0 0 22px; }
 .pg-lede { font-size: 19px; line-height: 1.6; color: color-mix(in srgb, var(--text) 78%, var(--soft)); max-width: 640px; margin: 0; text-wrap: pretty; }
 
 .pg-blocks { display: flex; flex-direction: column; gap: 8px; }
@@ -360,11 +381,25 @@ html, body { margin: 0; height: 100%; background: var(--bg); }
 }
 @media (max-width: 720px) {
   .pg-inner { padding: 92px 22px 80px; }
-  .pg-title { font-size: 38px; }
-  .pg-lede { font-size: 17px; }
+  .pg-title { font-size: clamp(28px, 8vw, 38px); }
+  .pg-lede { font-size: clamp(15px, 4vw, 17px); }
   .pg-stats { grid-template-columns: 1fr; }
   .pg-skillgroup { grid-template-columns: 1fr; gap: 8px; }
   .pg-entry-head h3 { font-size: 18px; }
   .app-bar { padding: 13px 20px; background: linear-gradient(var(--bg) 58%, transparent); }
   .nwc-head { padding-top: 96px; }
+}
+@media (max-width: 400px) {
+  .pg-inner { padding: 80px 14px 60px; }
+  .pg-title { font-size: clamp(24px, 8vw, 32px); }
+  .pg-lede { font-size: 14px; }
+  .pg-text { font-size: 14px; }
+  .pg-entry-head h3 { font-size: 16px; }
+  .pg-entry-body { padding-bottom: 18px; }
+  .pg-next-btn { font-size: 13px; padding: 9px 13px; }
+  .pg-back { font-size: 11px; padding: 6px 11px; }
+  .app-bar { padding: 10px 14px; }
+  .nwc-grid { padding: 6px 10px 18px; gap: 10px; }
+  .nwc-head { padding: 80px 16px 8px; }
+  .nw-egg { font-size: 12px; padding: 10px 14px; }
 }

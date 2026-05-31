@@ -77,7 +77,8 @@ function App() {
     <div className="app">
       <div className="app-bar">
         <button className="app-brand" onClick={back}>
-          <span className="app-brand-dot" style={{ position:'relative' }}
+          <span className="app-brand-dot egg-hint egg-hint-down" data-tip="// hold for 3s"
+            style={{ position:'relative' }}
             onMouseEnter={() => { dotTimerRef.current = setTimeout(() => setDotHint(true), 3000); }}
             onMouseLeave={() => { clearTimeout(dotTimerRef.current); setDotHint(false); }}>
             {dotHint && (
