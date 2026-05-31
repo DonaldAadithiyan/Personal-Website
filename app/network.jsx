@@ -606,7 +606,7 @@ function NetworkView({ onOpen }) {
           <header className="nwc-head">
             <div className="nwc-photo">
               <div className="nwc-photo-ring"></div>
-              <image-slot id={pr.photoId} shape="circle" fit="cover" placeholder="Drop headshot"
+              <image-slot id={pr.photoId} shape="circle" fit="cover" placeholder="Drop headshot" src="uploads/headshot.JPG"
                 style={{ position: 'absolute', inset: '0', width: '100%', height: '100%' }}></image-slot>
             </div>
             <div className="nwc-hi">{g.hi || 'Hi there! I’m'}</div>
@@ -704,7 +704,7 @@ function NetworkView({ onOpen }) {
                      onMouseEnter={() => setHovered(id)} onMouseLeave={() => setHovered(null)}>
                   <div className="nw-core" style={{ width: d, height: d }}>
                     <div className="nw-ring"></div><div className="nw-ring b"></div>
-                    <image-slot id={pr.photoId} shape="circle" fit="cover" placeholder="Drop headshot"
+                    <image-slot id={pr.photoId} shape="circle" fit="cover" placeholder="Drop headshot" src="uploads/headshot.JPG"
                       style={{ position: 'absolute', inset: '0', width: d + 'px', height: d + 'px' }}></image-slot>
                   </div>
                   <div className="nw-lab"><div className="t serif">{pr.name}</div><div className="s">{pr.role}</div></div>
