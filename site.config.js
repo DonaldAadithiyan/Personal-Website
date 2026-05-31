@@ -56,7 +56,7 @@ window.SITE = {
     // the "Hi there!" greeting card shown next to your photo neuron
     greeting: {
       hi: 'Hi there! I\'m',
-      blurb: 'Welcome to my universe — a final-year CS & Engineering undergrad at the University of Moratuwa, wiring together reinforcement learning, interpretability, and a stubborn curiosity about why models fail.',
+      blurb: 'Welcome to my universe — a final-year CS undergrad at the University of Moratuwa, I ship apps, chase gradients, and somehow still believe interpretability will save us all.',
       email: 'donaldaadithiyanwork@gmail.com',
     },
   },
