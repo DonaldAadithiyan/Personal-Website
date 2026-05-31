@@ -21,20 +21,20 @@ function HeroNeuro({ accent }) {
       canvas.width = W * dpr; canvas.height = H * dpr;
       canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const N = Math.min(46, Math.round(W / 24));
+      const N = Math.min(120, Math.round(W / 10));
       nodes = Array.from({ length: N }, () => {
         const z = Math.random();
         return {
-          x: rnd(0, W), y: rnd(0, H), z,
-          vx: rnd(-0.5, 0.5) * (0.12 + z * 0.22),
-          vy: rnd(-0.5, 0.5) * (0.12 + z * 0.22),
-          r: 0.6 + z * 2.2, ph: Math.random() * 6.28,
+          x: rnd(-20, W + 20), y: rnd(-20, H + 20), z,
+          vx: rnd(-0.5, 0.5) * (0.10 + z * 0.20),
+          vy: rnd(-0.5, 0.5) * (0.10 + z * 0.20),
+          r: 0.5 + z * 2.6, ph: Math.random() * 6.28,
         };
       });
     };
     build();
 
-    const LINK = 116, LINK2 = LINK * LINK;
+    const LINK = 160, LINK2 = LINK * LINK;
     const draw = (now) => {
       const t = now - start;
       ctx.clearRect(0, 0, W, H);
@@ -51,7 +51,7 @@ function HeroNeuro({ accent }) {
           const dx = a.x - b.x, dy = a.y - b.y; const d2 = dx * dx + dy * dy;
           if (d2 < LINK2) {
             const d = Math.sqrt(d2);
-            const al = (1 - d / LINK) * 0.16 * ((a.z + b.z) * 0.5 + 0.3);
+            const al = (1 - d / LINK) * 0.22 * ((a.z + b.z) * 0.5 + 0.3);
             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
             ctx.strokeStyle = `rgba(${COL[0]},${COL[1]},${COL[2]},${al.toFixed(3)})`;
             ctx.lineWidth = 0.6; ctx.stroke();

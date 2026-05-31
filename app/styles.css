@@ -34,8 +34,11 @@ html, body { margin: 0; height: 100%; background: var(--bg); }
 /* ---------- stage ---------- */
 .app-stage { position: absolute; inset: 0; }
 .app-net { position: absolute; inset: 0; transform-origin: var(--ox, 50%) var(--oy, 50%);
-  transition: transform 1.35s cubic-bezier(.42,0,.72,.03), opacity .9s ease .42s; will-change: transform, opacity; }
-.app-net[data-zoom="1"] { transform: scale(13) rotate(18deg); opacity: 0; pointer-events: none; }
+  /* return: instant snap — network was already rendered, just hidden */
+  transition: none; will-change: transform, opacity; }
+.app-net[data-zoom="1"] { transform: scale(13) rotate(18deg); opacity: 0; pointer-events: none;
+  /* opening: slow dramatic rocket zoom */
+  transition: transform 1.35s cubic-bezier(.42,0,.72,.03), opacity .9s ease .42s; }
 .app-page { position: absolute; inset: 0; z-index: 30; opacity: 0; transform: scale(1.06);
   transition: opacity .6s ease, transform .7s cubic-bezier(.2,.8,.3,1); }
 .app-page.show { opacity: 1; transform: none; }
