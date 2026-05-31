@@ -34,10 +34,13 @@ html, body { margin: 0; height: 100%; background: var(--bg); }
 /* ---------- stage ---------- */
 .app-stage { position: absolute; inset: 0; }
 .app-net { position: absolute; inset: 0; transform-origin: var(--ox, 50%) var(--oy, 50%);
-  transition: opacity 0.14s ease; will-change: transform, opacity; }
+  transition: opacity 0.14s ease; }
 .app-net[data-zoom="1"] { transform: scale(13) rotate(18deg); opacity: 0; pointer-events: none;
-  /* opening: slow dramatic rocket zoom */
+  will-change: transform, opacity;
   transition: transform 1.35s cubic-bezier(.42,0,.72,.03), opacity .9s ease .42s; }
+/* hide DOM nodes immediately on zoom so only the canvas animation is visible */
+.app-net[data-zoom="1"] .nw-scene,
+.app-net[data-zoom="1"] .nw-jokes { opacity: 0; transition: opacity 0.1s ease; }
 .app-page { position: absolute; inset: 0; z-index: 30; opacity: 0; transform: scale(1.06);
   transition: opacity .6s ease, transform .7s cubic-bezier(.2,.8,.3,1); }
 .app-page.show { opacity: 1; transform: none; }
@@ -46,10 +49,10 @@ html, body { margin: 0; height: 100%; background: var(--bg); }
    NETWORK (home) — 3D scene
    ==================================================================== */
 .nw-root { position: relative; width: 100%; height: 100%; overflow: hidden; }
-.nw-scene { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.nw-scene { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
 .nw-bgcanvas { position: absolute; inset: 0; z-index: 0; transform: scale(1.06); transform-origin: 50% 50%; opacity: 1; pointer-events: none; }
 .nw-jokes { position: absolute; inset: 0; z-index: 1; transition: transform .4s cubic-bezier(.2,.7,.3,1); pointer-events: none; }
-.nw-jokes.has-open { z-index: 8; }
+.nw-jokes.has-open { z-index: 55; }
 .nw-jokes .nw-joke { pointer-events: auto; }
 .nw-fgcanvas { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .nw-nodes { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
@@ -204,8 +207,8 @@ html, body { margin: 0; height: 100%; background: var(--bg); }
 .pg-heroneuro { position: absolute; inset: -40px -40px 0 -40px; z-index: 0; pointer-events: none;
   -webkit-mask: radial-gradient(160% 130% at 78% 28%, #000 18%, transparent 78%); mask: radial-gradient(160% 130% at 78% 28%, #000 18%, transparent 78%);
   opacity: 0; animation: heroNeuroIn 1s ease .1s forwards; }
+@keyframes heroNeuroIn { to { opacity: 0.7; } }
 .pg-heroneuro canvas { display: block; width: 100%; height: 100%; }
-@keyframes heroNeuroIn { to { opacity: 1; } }
 .pg-ghost { position: absolute; top: -38px; right: -6px; z-index: 0; pointer-events: none;
   font-family: 'Newsreader', Georgia, serif; font-weight: 500; font-size: 230px; line-height: 1;
   color: transparent; -webkit-text-stroke: 1px color-mix(in srgb, var(--teal) 26%, transparent);

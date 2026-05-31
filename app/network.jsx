@@ -31,9 +31,9 @@ function SocialIcon({ path }) {
 // fixed scatter positions (fractions) for the quirky background joke-neurons,
 // chosen to sit in the gaps around the main columns.
 const JOKE_POS = [
-  [0.10, 0.20], [0.13, 0.80], [0.45, 0.12], [0.52, 0.90],
+  [0.57, 0.19], [0.13, 0.82], [0.45, 0.12], [0.52, 0.90],
   [0.72, 0.10], [0.93, 0.30], [0.90, 0.84], [0.41, 0.58],
-  [0.21, 0.45], [0.64, 0.40], [0.80, 0.60], [0.30, 0.16],
+  [0.15, 0.88], [0.64, 0.40], [0.80, 0.60], [0.30, 0.16],
 ];
 
 function NetworkView({ onOpen }) {
@@ -103,28 +103,45 @@ function NetworkView({ onOpen }) {
   React.useEffect(() => { const t = setTimeout(() => setBooted(true), 90); return () => clearTimeout(t); }, []);
 
   // ---------- easter eggs ---------------------------------------------------
-  const [egg, setEgg] = React.useState(null); // 'konami' | 'overfit'
-  const fireRef = React.useRef(null);          // set by fg loop, lets eggs trigger a burst
+  const [egg, setEgg] = React.useState(null);
+  const [sleeping, setSleeping] = React.useState(false);
+  const sleepingRef = React.useRef(false);
+  const photoClickRef = React.useRef({ n: 0, t: 0 });
+  const sleepTimerRef = React.useRef(null);
+  const fireRef = React.useRef(null);
+
+  React.useEffect(() => { sleepingRef.current = sleeping; }, [sleeping]);
+
+  const resetSleep = React.useCallback(() => {
+    sleepingRef.current = false;
+    setSleeping(false);
+    clearTimeout(sleepTimerRef.current);
+    sleepTimerRef.current = setTimeout(() => { sleepingRef.current = true; setSleeping(true); }, 45000);
+  }, []);
+
   React.useEffect(() => {
-    // 1) console art
+    resetSleep();
+    return () => clearTimeout(sleepTimerRef.current);
+  }, [resetSleep]);
+
+  React.useEffect(() => {
     const css = 'color:#4edcb2;font-family:monospace;font-size:12px';
-    console.log('%c  ╭───────────────────────────────────╮\n  │  hello, curious dev 👋            │\n  │  you found the console.           │\n  │  try the Konami code on the page. │\n  ╰───────────────────────────────────╯', css);
-    // 2) Konami code → supernova
+    console.log('%c  ╭──────────────────────────────────────╮\n  │  hello, curious dev 👋               │\n  │  you found the console.              │\n  │  try: Konami code · click photo 5×   │\n  │  click "forward pass · live" text    │\n  │  idle 45s · visit all 5 neurons      │\n  ╰──────────────────────────────────────╯', css);
     const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
     let idx = 0;
     const onKey = (e) => {
+      resetSleep();
       const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
       idx = (k === seq[idx]) ? idx + 1 : (k === seq[0] ? 1 : 0);
       if (idx === seq.length) {
-        idx = 0;
-        setEgg('konami');
+        idx = 0; setEgg('konami');
         if (fireRef.current) fireRef.current();
         setTimeout(() => setEgg(null), 4200);
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [resetSleep]);
 
   // ---------- BACKGROUND huge DEPTH network (near = big/bright, far = small) -
   React.useEffect(() => {
@@ -336,7 +353,7 @@ function NetworkView({ onOpen }) {
     const firstCol = Object.values(L.nodes).filter((n) => n.col === 1).map((n) => n.id);
     const lastCol = Object.values(L.nodes).filter((n) => n.col === L.maxCol).map((n) => n.id);
     const spawn = () => {
-      if (signals.length > 9 || !firstCol.length) return;
+      if (signals.length > 9 || !firstCol.length || sleepingRef.current) return;
       const mid = firstCol[(Math.random() * firstCol.length) | 0];
       const seq = ['__you', mid];
       if (lastCol.length && L.maxCol > 1) seq.push(lastCol[(Math.random() * lastCol.length) | 0]);
@@ -543,6 +560,7 @@ function NetworkView({ onOpen }) {
 
   // ---------- parallax (anchored main section; only bg + jokes drift) -------
   const onMove = (e) => {
+    resetSleep();
     const r = rootRef.current.getBoundingClientRect();
     const x = e.clientX - r.left, y = e.clientY - r.top;
     mouseRef.current = { x, y, inside: true };
@@ -556,6 +574,25 @@ function NetworkView({ onOpen }) {
     mouseRef.current.inside = false;
     parallaxRef.current.x = 0; parallaxRef.current.y = 0;
     if (jokesRef.current) jokesRef.current.style.transform = 'translate(0,0)';
+  };
+
+  // #2 — headshot 5× fast-click
+  const onPhotoClick = () => {
+    resetSleep();
+    const now = Date.now(), pc = photoClickRef.current;
+    if (now - pc.t > 2000) pc.n = 0;
+    pc.n++; pc.t = now;
+    if (pc.n >= 5) {
+      pc.n = 0; setEgg('overload');
+      if (fireRef.current) fireRef.current();
+      setTimeout(() => setEgg(null), 4000);
+    }
+  };
+  // #4 — "forward pass · live" click
+  const onForwardPassClick = () => {
+    resetSleep(); setEgg('forwardpass');
+    if (fireRef.current) fireRef.current();
+    setTimeout(() => setEgg(null), 3500);
   };
 
   const isLit = (id) => !hovered || hovered === id || (L.neighbors[hovered] && L.neighbors[hovered].has(id));
@@ -700,8 +737,9 @@ function NetworkView({ onOpen }) {
             const dim = isLit(id) ? '' : 'dim';
             if (n.kind === 'input') {
               return (
-                <div key={id} className={`nw-node nw-input ${dim}`} style={{ left: p.x, top: p.y }}
-                     onMouseEnter={() => setHovered(id)} onMouseLeave={() => setHovered(null)}>
+                <div key={id} className={`nw-node nw-input ${dim}`} style={{ left: p.x, top: p.y, cursor: 'pointer' }}
+                     onMouseEnter={() => setHovered(id)} onMouseLeave={() => setHovered(null)}
+                     onClick={onPhotoClick}>
                   <div className="nw-core" style={{ width: d, height: d }}>
                     <div className="nw-ring"></div><div className="nw-ring b"></div>
                     <image-slot id={pr.photoId} shape="circle" fit="cover" placeholder="Drop headshot" src="uploads/headshot.JPG"
@@ -740,13 +778,31 @@ function NetworkView({ onOpen }) {
       </div>
 
       <div className="nw-hint"><span className="k">›</span> drag your eye through the network · hover a neuron · click to enter</div>
-      <div className="nw-coords">forward pass · live</div>
+      <div className="nw-coords" style={{ cursor: 'pointer' }} onClick={onForwardPassClick}>forward pass · live</div>
+
+      {/* #5 sleep overlay */}
+      {sleeping && (
+        <div style={{ position:'absolute', inset:0, background:'rgba(7,10,22,0.78)', zIndex:20,
+          display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:10, pointerEvents:'none' }}>
+          <div style={{ fontFamily:'IBM Plex Mono,monospace', fontSize:13, color:'var(--teal)', letterSpacing:'.04em' }}>model sleeping</div>
+          <div style={{ fontFamily:'IBM Plex Mono,monospace', fontSize:11, color:'var(--faint)' }}>move mouse to wake · send gradient</div>
+        </div>
+      )}
 
       {/* easter egg toast */}
-      <div className={`nw-egg ${egg ? 'on' : ''}`}>
-        <span className="nw-egg-k">↑↑↓↓←→←→ B A</span>
-        gradient exploded — the whole network just fired at once 💥
-      </div>
+      {(() => {
+        const msgs = {
+          konami:      { k:'↑↑↓↓←→←→ B A',  m:'gradient exploded — the whole network just fired at once 💥' },
+          overload:    { k:'5× click 💥',     m:'loss = NaN — try gradient clipping next time' },
+          forwardpass: { k:'forward pass ·',  m:'cascade complete — all activations computed ✓' },
+        };
+        const d = msgs[egg] || msgs.konami;
+        return (
+          <div className={`nw-egg ${egg ? 'on' : ''}`}>
+            <span className="nw-egg-k">{d.k}</span>{d.m}
+          </div>
+        );
+      })()}
     </div>
   );
 }
